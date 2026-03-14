@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { ethers } = require('ethers');
 const chainSplitABI = require('../abis/ChainSplit.json');
+const Deal = require('../models/Deal'); // Import the Deal Schema
 
 // Connect to the ChainSplit Contract
 const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
@@ -11,24 +12,37 @@ const contract = new ethers.Contract(
     wallet
 );
 
-// 1. Create Deal & Lock Funds (The "Entry" point)
+// 1. Create Deal, Save to MongoDB & Lock Funds
 exports.processIncomingDeal = async (req, res) => {
     try {
         const { amount, creatorAddress, platformAddress, dealId, deadline, platformShare, creatorShare } = req.body;
 
-        // Validation: Must total 99% because the contract adds your 1% fee automatically
-        if (Number(platformShare) + Number(creatorShare) !== 9900) {
-            return res.status(400).json({ error: "Shares must total 99% (9900 BPS)" });
+        // UPDATED: Validation for 2% protocol fee (9800 BPS)
+        if (Number(platformShare) + Number(creatorShare) !== 9800) {
+            return res.status(400).json({ error: "Shares must total 98% (9800 BPS)" });
         }
 
-        // Create Stripe Intent for Fiat payment tracking
+        // STEP A: Save to MongoDB (Active Money Tracking)
+        const newDeal = new Deal({
+            dealId,
+            creatorAddress: creatorAddress.toLowerCase(),
+            platformAddress: platformAddress.toLowerCase(),
+            amount: Number(amount),
+            creatorShare,
+            platformShare,
+            deadline,
+            status: 'active'
+        });
+        await newDeal.save();
+
+        // STEP B: Create Stripe Intent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(amount * 100),
             currency: 'usd',
             metadata: { dealId }
         });
 
-        // Trigger Blockchain Escrow
+        // STEP C: Trigger Blockchain Escrow
         const tx = await contract.depositCustom(
             dealId, 
             creatorAddress, 
@@ -40,27 +54,100 @@ exports.processIncomingDeal = async (req, res) => {
         );
         await tx.wait();
 
-        res.json({ success: true, txHash: tx.hash, clientSecret: paymentIntent.client_secret });
+        res.json({ 
+            success: true, 
+            txHash: tx.hash, 
+            clientSecret: paymentIntent.client_secret,
+            message: "Deal synchronized with DB and Blockchain"
+        });
+
+    } catch (error) {
+        // Fallback: If blockchain fails after DB save, remove from DB to keep sync
+        await Deal.deleteOne({ dealId: req.body.dealId });
+        res.status(500).json({ error: error.message });
+    }
+};
+// 3. NEW: Fetch User Stats & Active Money
+exports.getUserDashboard = async (req, res) => {
+    try {
+        const address = req.params.address.toLowerCase();
+
+        // Find all 'active' deals involving this wallet
+        const activeDeals = await Deal.find({
+            status: 'active',
+            $or: [{ creatorAddress: address }, { platformAddress: address }]
+        });
+
+        let totalLockedForUser = 0;
+
+        // Calculate specific user earnings for each deal
+        const dealsWithShares = activeDeals.map(deal => {
+            let userShareBps = 0;
+            
+            // Logic: Is this person the creator or the platform?
+            if (address === deal.creatorAddress) {
+                userShareBps = deal.creatorShare;
+            } else {
+                userShareBps = deal.platformShare;
+            }
+
+            // Calculation: (Total ETH * User Share BPS) / 10000
+            const myMoney = (deal.amount * userShareBps) / 10000;
+            totalLockedForUser += myMoney;
+
+            return {
+                dealId: deal.dealId,
+                totalAmount: deal.amount,
+                myShareETH: myMoney.toFixed(4),
+                deadline: deal.deadline,
+                role: address === deal.creatorAddress ? 'Creator' : 'Platform'
+            };
+        });
+
+        res.json({
+            success: true,
+            address,
+            totalActiveMoneyETH: totalLockedForUser.toFixed(4),
+            activeDealsCount: activeDeals.length,
+            deals: dealsWithShares
+        });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// 2. Owner-Controlled Approval (The "Release" point)
+// 2. Owner-Controlled Approval & Automatic Removal
 exports.approveDeal = async (req, res) => {
     try {
-        // Updated to match your contract: approve(uint256 _id, bool _approvePlatform, bool _approveCreator)
         const { dealId, approvePlatform, approveCreator } = req.body;
 
-        console.log(`Setting approvals for Deal #${dealId}: Platform(${approvePlatform}), Creator(${approveCreator})`);
-
-        // Trigger the 'approve' function in the contract
+        // A. Update Approval Flags on Contract
         const tx = await contract.approve(dealId, approvePlatform, approveCreator);
         await tx.wait();
 
+        // B. Check if we should release funds
+        // If you passed 'true' for both in the request, or check the contract state
+        if (approvePlatform && approveCreator) {
+            console.log(`🚀 Mutual Approval reached for #${dealId}. Releasing...`);
+            
+            const releaseTx = await contract.autoRelease(dealId);
+            await releaseTx.wait();
+
+            // C. Update MongoDB Status to 'settled'
+            // This removes it from the user's "Active Money" calculation
+            await Deal.findOneAndUpdate({ dealId }, { status: 'settled' });
+
+            return res.json({ 
+                success: true, 
+                message: "Funds released and DB status updated to settled.",
+                txHash: releaseTx.hash 
+            });
+        }
+
         res.json({ 
             success: true, 
-            message: "Approval status updated on blockchain",
+            message: "Approval status updated. Waiting for mutual agreement.",
             txHash: tx.hash 
         });
     } catch (error) {

@@ -1,191 +1,238 @@
 import React, { useState } from 'react';
-import { Copy, Terminal, Server, Shield, Coins, Clock, ChevronRight, CheckCircle2, AlertTriangle, Zap } from 'lucide-react';
+import { 
+  Copy, Terminal, Server, Shield, Coins, Clock, CheckCircle2, 
+  AlertTriangle, Zap, Code2, Globe, ExternalLink, Menu, X, ChevronUp,
+  Cpu, Activity, Layers
+} from 'lucide-react';
 
 const Docs = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
   };
 
-  const tabs = ['Protocol API', 'Admin Controls', 'Settlement Rules'];
+  const tabs = [
+    { name: 'Protocol API', icon: <Server size={16}/> },
+    { name: 'Admin Controls', icon: <Shield size={16}/> },
+    { name: 'Settlement Rules', icon: <Clock size={16}/> },
+    { name: 'Events & Hooks', icon: <Activity size={16}/> }
+  ];
 
   return (
-    <div className="max-w-6xl mx-auto py-20 px-8">
-      {/* Header */}
-      <div className="mb-12">
-        <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Protocol Interaction Guide</h1>
-        <p className="text-xl text-gray-500">How platforms, admins, and creators interact with the ChainSplit backend relayer and smart contract.</p>
-      </div>
-
-      {/* API & Contract Context */}
-      <div className="grid md:grid-cols-3 gap-6 mb-16">
-        <div className="p-8 border border-gray-100 rounded-3xl bg-blue-50/20">
-          <div className="flex items-center gap-2 mb-4 text-blue-600">
-            <Server size={18} />
-            <p className="text-xs font-bold uppercase tracking-widest">Backend Base URL</p>
-          </div>
-          <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-blue-100 font-mono text-xs">
-            <code>http://localhost:5000/api</code>
-            <Copy size={14} className="text-gray-400 cursor-pointer hover:text-black" onClick={() => copyToClipboard('http://localhost:5000/api')} />
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 lg:pb-0">
+      <div className="max-w-7xl mx-auto py-12 px-6 lg:py-16 lg:px-8">
         
-        <div className="p-8 border border-gray-100 rounded-3xl bg-purple-50/20">
-          <div className="flex items-center gap-2 mb-4 text-purple-600">
-            <Shield size={18} />
-            <p className="text-xs font-bold uppercase tracking-widest">Contract (Sepolia)</p>
+        {/* Header Section */}
+        <div className="max-w-3xl mb-12 lg:mb-16">
+          <div className="flex items-center gap-2 mb-4">
+            <Code2 className="text-blue-600" size={20} />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Developer Documentation</span>
           </div>
-          <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-purple-100 font-mono text-xs">
-            <code>0x452D78Cee3f5c67ead028225FBcF11CF504B8549</code>
-            <Copy size={14} className="text-gray-400 cursor-pointer hover:text-black" onClick={() => copyToClipboard('0x452D78Cee3f5c67ead028225FBcF11CF504B8549')} />
+          <h1 className="text-3xl lg:text-4xl font-semibold text-slate-900 mb-4 lg:mb-6 tracking-tight">Protocol Interaction Guide</h1>
+          <p className="text-base lg:text-lg text-slate-500 leading-relaxed">
+            Integrate the ChainSplit infrastructure. Our API manages complex on-chain revenue splits and gas-free settlements for your platform.
+          </p>
+        </div>
+
+        {/* Global Configuration Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-12 lg:mb-16">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-2 text-slate-400 mb-4">
+              <Globe size={14} />
+              <p className="text-[10px] font-bold uppercase tracking-widest">Base API Endpoint</p>
+            </div>
+            <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 font-mono text-[11px] text-slate-600">
+              <code>http://localhost:5000/api</code>
+              <button onClick={() => copyToClipboard('http://localhost:5000/api')} className="hover:text-blue-600">
+                <Copy size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-2 text-slate-400 mb-4">
+              <Shield size={14} />
+              <p className="text-[10px] font-bold uppercase tracking-widest">Contract (Sepolia)</p>
+            </div>
+            <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 font-mono text-[11px] text-slate-600">
+              <code>0x45...8549</code>
+              <button onClick={() => copyToClipboard('0x452D78Cee3f5c67ead028225FBcF11CF504B8549')} className="hover:text-blue-600">
+                <Copy size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-2 text-slate-400 mb-4">
+              <Coins size={14} />
+              <p className="text-[10px] font-bold uppercase tracking-widest">Protocol Fee</p>
+            </div>
+            <div className="flex items-baseline gap-2">
+               <h3 className="text-xl font-semibold text-slate-900">200 BPS</h3>
+               <span className="text-xs text-slate-400">(2.0%)</span>
+            </div>
           </div>
         </div>
 
-        <div className="p-8 border border-gray-100 rounded-3xl bg-orange-50/20">
-          <div className="flex items-center gap-2 mb-4 text-orange-600">
-            <Coins size={18} />
-            <p className="text-xs font-bold uppercase tracking-widest">Protocol Fee</p>
-          </div>
-          <h3 className="text-xl font-bold text-orange-900">200 BPS (2%)</h3>
-          <p className="text-gray-400 text-xs mt-1">Deducted on deposit to fund automated daily relayers.</p>
-        </div>
-      </div>
+        <div className="flex flex-col lg:flex-row gap-12 items-start relative">
+          
+          {/* DESKTOP SIDEBAR */}
+          <aside className="hidden lg:flex lg:w-64 sticky top-28 flex-col space-y-1">
+            {tabs.map((tab, idx) => (
+              <button 
+                key={idx} 
+                onClick={() => setActiveTab(idx)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === idx 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200' 
+                  : 'text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                {tab.icon}
+                {tab.name}
+              </button>
+            ))}
+          </aside>
 
-      {/* Tabs */}
-      <div className="flex gap-8 border-b border-gray-100 mb-12 overflow-x-auto">
-        {tabs.map((tab, idx) => (
-          <button 
-            key={idx} 
-            onClick={() => setActiveTab(idx)}
-            className={`pb-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === idx ? 'border-b-2 border-black text-black' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      <div className="space-y-16">
-        
-        {/* TAB 0: CREATE DEAL */}
-        {activeTab === 0 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid md:grid-cols-2 gap-12">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">1. Initialize Escrow</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Call the <code>/create</code> endpoint to initiate a new revenue split. Our backend manages the 2% fee and executes the on-chain deposit.
-                </p>
-                <ul className="space-y-4">
-                  <li className="flex gap-3 text-sm text-gray-600">
-                    <CheckCircle2 size={18} className="text-orange-500" /> 
-                    <span><b>New Rule:</b> Shares must total 9800 BPS (leaving 2% for protocol).</span>
-                  </li>
-                  <li className="flex gap-3 text-sm text-gray-600">
-                    <CheckCircle2 size={18} className="text-green-500" /> 
-                    <span>Funds are locked on Sepolia until mutual approval or deadline.</span>
-                  </li>
-                </ul>
+          {/* MOBILE TABS OVERLAY */}
+          <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-sm">
+            {isMobileMenuOpen && (
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl mb-3 p-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                {tabs.map((tab, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => {
+                      setActiveTab(idx);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-4 rounded-xl text-sm font-semibold transition-all mb-1 last:mb-0 ${
+                      activeTab === idx ? 'bg-slate-50 text-blue-600' : 'text-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {tab.icon}
+                      {tab.name}
+                    </div>
+                  </button>
+                ))}
               </div>
-              <div className="bg-[#0a0b0d] p-6 rounded-2xl shadow-xl">
-                <p className="text-gray-500 text-[10px] font-mono mb-2 uppercase">POST /payments/create</p>
-                <pre className="text-blue-300 font-mono text-xs overflow-x-auto">
+            )}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="w-full bg-[#0F172A] text-white flex items-center justify-between px-6 py-4 rounded-2xl shadow-xl active:scale-95 transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <Menu size={18} />
+                <span className="text-sm font-bold uppercase tracking-widest">{tabs[activeTab].name}</span>
+              </div>
+              <ChevronUp size={18} className={`transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          {/* Main Doc Window */}
+          <div className="flex-1 bg-white border border-slate-200 rounded-[2rem] p-6 lg:p-12 shadow-sm min-h-[500px] w-full">
+            
+            {activeTab === 0 && (
+              <div className="animate-in fade-in duration-500">
+                <h2 className="text-xl lg:text-2xl font-semibold text-slate-900 mb-6 font-sans">Initialize Smart Escrow</h2>
+                <p className="text-sm lg:text-base text-slate-500 leading-relaxed mb-8">
+                  Issue a POST request to our secure relayer to lock funds on-chain. This handles the 2% protocol fee and begins the settlement timer.
+                </p>
+                <div className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-lg mb-8">
+                  <div className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-slate-800 bg-slate-900/50">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Endpoint: /payments/create</span>
+                    <Terminal size={14} className="text-slate-500" />
+                  </div>
+                  <pre className="p-4 lg:p-6 text-blue-300 font-mono text-[10px] lg:text-xs overflow-x-auto">
 {`{
   "dealId": 2026,
-  "amount": 0.5,
+  "amount": 0.5,           // Amount in ETH
   "creatorAddress": "0x...",
   "platformAddress": "0x...",
-  "deadline": 1741344000,
-  "platformShare": 7000,
-  "creatorShare": 2800 // Total must be 9800
+  "deadline": 1741344000,  // Unix timestamp
+  "platformShare": 7000,   // 70.00%
+  "creatorShare": 2800    // 28.00% (Total 9800)
 }`}
-                </pre>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* TAB 1: ADMIN CONTROL */}
-        {activeTab === 1 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid md:grid-cols-2 gap-12">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">2. Manage Two-Key Approvals</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  The protocol uses a dual-flag system. When you approve both parties, the backend triggers an <b>immediate push payout</b>.
-                </p>
-                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                  <h4 className="font-bold text-sm mb-3 flex items-center gap-2 text-black">
-                    <Zap size={16} className="text-yellow-500 fill-yellow-500"/> Instant Release Logic:
-                  </h4>
-                  <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                    If <code>approvePlatform</code> and <code>approveCreator</code> are both set to true, the API calls <code>autoRelease</code> immediately.
-                  </p>
-                  <ul className="text-xs text-gray-500 space-y-2 font-medium">
-                    <li>• User Gas: $0 (Paid by Backend)</li>
-                    <li>• Payout Speed: Instant after block confirmation</li>
-                  </ul>
+                  </pre>
                 </div>
               </div>
-              <div className="bg-[#0a0b0d] p-6 rounded-2xl shadow-xl">
-                <p className="text-gray-500 text-[10px] font-mono mb-2 uppercase">POST /payments/approve</p>
-                <pre className="text-green-400 font-mono text-xs overflow-x-auto">
+            )}
+
+            {activeTab === 1 && (
+              <div className="animate-in fade-in duration-500">
+                <h2 className="text-xl lg:text-2xl font-semibold text-slate-900 mb-6">Dual-Key Governance</h2>
+                <p className="text-sm lg:text-base text-slate-500 leading-relaxed mb-8">
+                  Control the flow of funds. Approving both keys triggers an instant push payout to all parties.
+                </p>
+                <div className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-lg">
+                   <div className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-slate-800 bg-slate-900/50">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Endpoint: /payments/approve</span>
+                    <Terminal size={14} className="text-slate-500" />
+                  </div>
+                  <pre className="p-4 lg:p-6 text-green-400 font-mono text-[10px] lg:text-xs">
 {`{
   "dealId": 2026,
   "approvePlatform": true,
   "approveCreator": true
 }`}
-                </pre>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* TAB 2: SETTLEMENT LOGIC */}
-        {activeTab === 2 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="max-w-4xl">
-              <h3 className="text-2xl font-bold mb-6 text-gray-900">3. Automated "Zero-Touch" Settlement</h3>
-              <p className="text-gray-600 mb-10 leading-relaxed">
-                ChainSplit operates an autonomous 24-hour relayer. We manage the blockchain state and pay gas fees to ensure funds land directly in user wallets.
-              </p>
-              
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div className="p-8 border border-blue-100 bg-blue-50/20 rounded-3xl">
-                  <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
-                    <Clock size={20}/> Daily Cron Job
-                  </h4>
-                  <p className="text-sm text-blue-800 leading-relaxed">
-                    Every 24 hours at midnight, our backend relayer scans the blockchain for expired or approved deals and executes the <code>autoRelease</code> function.
-                  </p>
-                </div>
-
-                <div className="p-8 border border-red-100 bg-red-50/20 rounded-3xl">
-                  <h4 className="font-bold text-red-900 mb-4 flex items-center gap-2">
-                    <AlertTriangle size={20}/> Stalling Penalty
-                  </h4>
-                  <p className="text-sm text-red-800 leading-relaxed">
-                    If a deadline expires without platform approval, the relayer automatically redirects <b>5% of the Platform's share</b> to the admin wallet.
-                  </p>
+                  </pre>
                 </div>
               </div>
+            )}
 
-              <div className="bg-gray-900 rounded-3xl p-8 shadow-inner">
-                <div className="flex items-center justify-between mb-6 text-gray-400">
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest">Relayer Architecture</span>
-                  <Terminal size={18} />
-                </div>
-                <div className="space-y-4">
-                   <p className="text-gray-400 text-sm italic">"Users never pay gas. The 2% protocol fee funds the daily automated push of ETH to their addresses."</p>
-                   <div className="bg-black/50 p-4 rounded-xl border border-gray-800 font-mono text-xs text-blue-300">
-                     await contract.autoRelease(dealId); // Signed by Backend Wallet
-                   </div>
+            {activeTab === 2 && (
+              <div className="animate-in fade-in duration-500">
+                <h2 className="text-xl lg:text-2xl font-semibold text-slate-900 mb-6 font-sans">Automated Settlement Engine</h2>
+                <div className="grid gap-4">
+                  <div className="p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100 flex gap-4">
+                    <div className="bg-white p-3 rounded-xl shadow-sm h-fit">
+                        <Clock className="text-blue-600" size={20} />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-semibold text-slate-900">24h Batch Processing</h4>
+                        <p className="text-[11px] text-slate-500 mt-1">Our relayer executes the 'autoRelease' function every midnight UTC for all expired deals.</p>
+                    </div>
+                  </div>
+                  <div className="p-6 bg-red-50/50 rounded-[1.5rem] border border-red-100 flex gap-4">
+                    <div className="bg-white p-3 rounded-xl shadow-sm h-fit">
+                        <AlertTriangle className="text-red-600" size={20} />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-semibold text-red-900">Inactivity Enforcement</h4>
+                        <p className="text-[11px] text-red-600/70 mt-1">Deals released via deadline expiration incur a 5% platform penalty to the protocol treasury.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
-        )}
+            )}
+
+            {activeTab === 3 && (
+              <div className="animate-in fade-in duration-500">
+                <h2 className="text-xl lg:text-2xl font-semibold text-slate-900 mb-6">On-Chain Event Listeners</h2>
+                <p className="text-sm text-slate-500 mb-6 italic">Listen to these events on your frontend to provide real-time UI updates.</p>
+                <div className="bg-[#0F172A] rounded-2xl overflow-hidden shadow-lg">
+                  <div className="flex items-center justify-between px-6 py-3 border-b border-slate-800 bg-slate-900/50">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-blue-400">ethers.js / wagmi hooks</span>
+                  </div>
+                  <pre className="p-6 text-blue-300 font-mono text-[10px] lg:text-xs leading-relaxed">
+{`// Listen for New Deposits
+contract.on("FundsDeposited", (id, amount, creator) => {
+  console.log(\`Vault #\${id} created for \${creator}\`);
+});
+
+// Listen for Payouts
+contract.on("FundsReleased", (id, platformAmt, creatorAmt) => {
+  toast.success("Revenue distributed successfully!");
+});`}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
       </div>
     </div>
   );
