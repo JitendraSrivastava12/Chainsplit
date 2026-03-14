@@ -11,6 +11,7 @@ import {
   ExternalLink,
   ChevronRight
 } from 'lucide-react';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Dashboard = ({ account }) => {
   const [stats, setStats] = useState(null);
@@ -20,7 +21,7 @@ const Dashboard = ({ account }) => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/payments/dashboard/${account}`);
+      const response = await fetch(`${API_BASE_URL}/payments/dashboard/${account}`);
       if (!response.ok) throw new Error("Failed to fetch dashboard data");
       const data = await response.json();
       setStats(data);
