@@ -1,6 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { ethers } = require('ethers');
-const chainSplitABI = require('../abis/ChainSplit.json');
+const chainSplitABI = require('../abis/Chainsplit.json');
 const Deal = require('../models/Deal'); // Import the Deal Schema
 
 // Connect to the ChainSplit Contract
